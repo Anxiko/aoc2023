@@ -1,46 +1,58 @@
 from shared.files import INPUT_PATH
 
-DIGITS: dict[str, int] = (
-	{str(digit): digit for digit in range(1, 10 + 1)}
-	| {
-		(idx + 1): value for (idx, value) in
-		enumerate(["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"])
-	}
-)
+NUMERIC_DIGITS: dict[str, int] = {str(digit): digit for digit in range(1, 10 + 1)}
+SPELT_DIGITS: list[tuple[str, int]] = [
+	((idx + 1), value) for (idx, value) in
+	enumerate(["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"])
+]
 
 
-def extract_digits(line: str) -> tuple[int, int]:
-	first: int | None = None
-	last: int | None = None
-
-	for char in line:
-		if (digit_value := DIGITS.get(char)) is not None:
-			if first is None:
-				first = digit_value
-			else:
-				last = digit_value
-
-	if first is None:
-		raise ValueError(f"Couldn't extract digits from {line!r}")
-
-	if last is None:
-		last = first
-
-	return first, last
+def parse_spelt_digit(substring: str) -> int | None:
+	for (spelt_value, spelt_digit) in SPELT_DIGITS:
+		if substring.startswith(spelt_digit):
+			return spelt_value
+	return None
 
 
-def sum_digits(digits: tuple[int, int]) -> int:
+def digits_to_number(digits: tuple[int, int]) -> int:
 	return digits[0] * 10 + digits[1]
 
 
-def part1(input_part1: list[str]) -> int:
+def extract_digits(line: str, use_spelt_digits: bool) -> tuple[int, int]:
+	digits: list[int] = []
+	for idx, char in enumerate(line):
+		digit: int | None = NUMERIC_DIGITS.get(char)
+
+		if digit is None and use_spelt_digits:
+			digit = parse_spelt_digit(line[idx:])
+
+		if digit is not None:
+			digits.append(digit)
+
+	return digits[0], digits[-1]
+
+
+def calculate_solution(lines: list[str], use_spelt_digits: bool) -> int:
 	return sum(map(
-		lambda line: sum_digits(extract_digits(line)),
-		input_part1
+		lambda line: digits_to_number(extract_digits(line, use_spelt_digits)),
+		lines
 	))
 
 
+def part1(lines: list[str]) -> int:
+	return calculate_solution(lines, use_spelt_digits=False)
+
+
+def part2(lines: list[str]) -> int:
+	return calculate_solution(lines, use_spelt_digits=True)
+
+
 if __name__ == '__main__':
-	with open(INPUT_PATH / "day1" / "part1.txt") as f:
-		result_part1: int = part1([line.strip() for line in f.readlines()])
+	with open(INPUT_PATH / "day1" / "both.txt") as f:
+		lines: list[str] = list(map(str.strip, f.readlines()))
+
+		result_part1: int = part1(lines)
 		print(f"Part 1: {result_part1}")
+
+		result_part2: int = part2(lines)
+		print(f"Part 2: {result_part2}")
