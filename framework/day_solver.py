@@ -27,6 +27,7 @@ class DaySolver[InputType, OutputType]:
 
 		return input_for_day / f"part{part}.txt"
 
+	@abstractmethod
 	def _parse_input(self, path: Path) -> InputType:
 		pass
 
