@@ -2,6 +2,7 @@ import enum
 import re
 from collections import Counter
 from dataclasses import dataclass
+from functools import reduce
 from typing import Self, Iterable
 
 from shared.files import INPUT_PATH
@@ -36,8 +37,12 @@ def parse_draw(raw_draw: str) -> Draw:
 	return draw
 
 
-def draw_lt(left: Draw, right: Draw) -> bool:
-	return left < right
+def draw_le(left: Draw, right: Draw) -> bool:
+	return left <= right
+
+
+def max_draw(left: Draw, right: Draw) -> Draw:
+	return left | right
 
 
 @dataclass
@@ -59,10 +64,13 @@ class Game:
 		return cls(game_id, draws)
 
 	def is_possible(self, limit: Draw) -> bool:
-		return all(draw_lt(draw, limit) for draw in self.draws)
+		return draw_le(self.min_blocks(), limit)
 
 	def get_id(self) -> int:
 		return self.game_id
+
+	def min_blocks(self) -> Draw:
+		return reduce(max_draw, self.draws, Counter())
 
 
 def part1(games: list[Game]) -> int:
