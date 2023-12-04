@@ -3,6 +3,7 @@ import re
 from collections import Counter
 from dataclasses import dataclass
 from functools import reduce
+from math import prod
 from typing import Self, Iterable
 
 from shared.files import INPUT_PATH
@@ -72,16 +73,30 @@ class Game:
 	def min_blocks(self) -> Draw:
 		return reduce(max_draw, self.draws, Counter())
 
+	def power(self) -> int:
+		min_blocks: Draw = self.min_blocks()
+		if len(min_blocks) < len(Color):
+			return 0
+		return prod(min_blocks.values())
+
 
 def part1(games: list[Game]) -> int:
 	return sum(map(Game.get_id, filter(lambda g: g.is_possible(LIMITS_DRAW_1), games)))
 
 
+def part2(games: list[Game]) -> int:
+	return sum(map(Game.power, games))
+
+
 def main() -> None:
 	with open(INPUT_PATH / "day2" / "part1.txt") as file_part1:
 		games: list[Game] = list(map(Game.from_line, file_part1.readlines()))
+
 		part1_solution: int = part1(games)
-		print(f"Game 1: {part1_solution}")
+		print(f"Part 1: {part1_solution}")
+
+		part2_solution: int = part2(games)
+		print(f"Part 2: {part2_solution}")
 
 
 if __name__ == '__main__':
