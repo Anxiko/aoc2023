@@ -31,13 +31,15 @@ class DaySolver[InputType, OutputType]:
 	def _parse_input(self, path: Path) -> InputType:
 		pass
 
-	def solve(self) -> None:
+	def solve(self, part1: bool = True, part2: bool = True) -> None:
 		print(f"Day {self.day}")
 
-		input_part1: InputType = self._parse_input(self._input_file(1))
-		output_part1: OutputType = self._solve_part1(input_part1)
-		print(f"Part 1: {output_part1}")
+		if part1:
+			input_part1: InputType = self._parse_input(self._input_file(1))
+			output_part1: OutputType = self._solve_part1(input_part1)
+			print(f"Part 1: {output_part1}")
 
-		input_part2: InputType = self._parse_input(self._input_file(2))
-		output_part2: OutputType = self._solve_part2(input_part2)
-		print(f"Part 2: {output_part2}")
+		if part2:
+			input_part2: InputType = self._parse_input(self._input_file(2))
+			output_part2: OutputType = self._solve_part2(input_part2)
+			print(f"Part 2: {output_part2}")
