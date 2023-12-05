@@ -1,4 +1,5 @@
 import itertools
+import math
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Self
@@ -18,17 +19,17 @@ class Coord:
 
 
 class NumberRow:
-	number: int
+	value: int
 	digit_count: int
 	position: Coord
 
 	def __init__(self, digit: int, position: Coord):
-		self.number = digit
+		self.value = digit
 		self.position = position
 		self.digit_count = 1
 
 	def add_digit(self, digit: int) -> None:
-		self.number = 10 * self.number + digit
+		self.value = 10 * self.value + digit
 		self.digit_count += 1
 
 	def neighbour_coords(self) -> Iterable[Coord]:
@@ -36,6 +37,9 @@ class NumberRow:
 			range(self.position.x - 1, self.position.x + self.digit_count + 1),
 			range(self.position.y - 1, self.position.y + 2)
 		))
+
+	def is_neighbour_to(self, neighbour: Coord) -> bool:
+		return neighbour in self.neighbour_coords()
 
 
 class NumberRowsBuilder:
@@ -65,10 +69,10 @@ class NumberRowsBuilder:
 @dataclass
 class Day3Input:
 	number_rows: list[NumberRow]
-	symbol_positions: set[Coord]
+	symbols: dict[Coord, str]
 
 
-_SYMBOLS: set[str] = {""}
+_GEAR_NEIGHBOURS: int = 2
 
 
 class Day3(DaySolver):
@@ -77,16 +81,22 @@ class Day3(DaySolver):
 
 	def _solve_part1(self, part_input: Day3Input) -> int:
 		return sum(
-			number_row.number for number_row in part_input.number_rows
-			if any(n in part_input.symbol_positions for n in number_row.neighbour_coords())
+			number_row.value for number_row in part_input.number_rows
+			if any(n in part_input.symbols for n in number_row.neighbour_coords())
 		)
 
 	def _solve_part2(self, part_input: Day3Input) -> int:
-		return 0
+		gear_positions: Iterable[Coord] = (pos for pos, char in part_input.symbols.items() if char == "*")
+		return sum(
+			filter(
+				lambda pos: pos is not None,
+				map(lambda pos: _maybe_gear_ratio(part_input, pos), gear_positions)
+			)
+		)
 
 	def _parse_input(self, path: Path) -> Day3Input:
 		numbers: list[NumberRow] = []
-		symbol_positions: set[Coord] = set()
+		symbols: dict[Coord, str] = {}
 
 		with open(path) as f:
 			row: int
@@ -106,10 +116,23 @@ class Day3(DaySolver):
 						row_builder.finish_current_number()
 
 						if character != ".":
-							symbol_positions.add(coord)
+							symbols[coord] = character
 				numbers.extend(row_builder.get_numbers())
 
-		return Day3Input(numbers, symbol_positions)
+		return Day3Input(numbers, symbols)
+
+
+def _maybe_gear_ratio(part_input: Day3Input, position: Coord) -> int | None:
+	neighbour_numbers: list[int] = []
+	for number in part_input.number_rows:
+		if number.is_neighbour_to(position):
+			neighbour_numbers.append(number.value)
+			if len(neighbour_numbers) > _GEAR_NEIGHBOURS:
+				break
+
+	if len(neighbour_numbers) == _GEAR_NEIGHBOURS:
+		return math.prod(neighbour_numbers)
+	return None
 
 
 if __name__ == '__main__':
