@@ -22,8 +22,8 @@ class Card:
 		match = _CARD_PATTERN.match(line)
 		return cls(cls.parse_numbers(match["winners"]), cls.parse_numbers(match["numbers"]))
 
-	def numbers_won(self) -> list[int]:
-		return list(set(self.winners) & set(self.numbers))
+	def numbers_won(self) -> int:
+		return len(set(self.winners) & set(self.numbers))
 
 
 @dataclass
@@ -32,8 +32,7 @@ class Day4Input:
 
 
 def _card_score(card: Card) -> int:
-	numbers_won = card.numbers_won()
-	count: int = len(numbers_won)
+	count: int = card.numbers_won()
 	if count > 0:
 		return 2 ** (count - 1)
 	return 0
@@ -50,7 +49,16 @@ class Day4(DaySolver[Day4Input, int]):
 		))
 
 	def _solve_part2(self, part_input: Day4Input) -> int:
-		pass
+		card_owned: list[int] = [1 for _ in part_input.cards]
+
+		for idx, card in enumerate(part_input.cards):
+			amount_of_card: int = card_owned[idx]
+
+			won_count: int = card.numbers_won()
+			for extra_card_idx in range(idx + 1, idx + 1 + won_count):
+				card_owned[extra_card_idx] += amount_of_card
+
+		return sum(card_owned)
 
 	def _parse_input(self, path: Path) -> Day4Input:
 		with open(path) as f:
@@ -59,4 +67,4 @@ class Day4(DaySolver[Day4Input, int]):
 
 
 if __name__ == '__main__':
-	Day4().solve(part2=False)
+	Day4().solve()
