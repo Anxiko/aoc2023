@@ -34,3 +34,6 @@ class Coord:
 				)
 			)
 		)
+
+	def manhattan(self) -> int:
+		return abs(self.x) + abs(self.y)
