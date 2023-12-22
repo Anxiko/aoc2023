@@ -10,3 +10,7 @@ def chunk_on[X](iterable: Iterable[X], sep_detector: Callable[[X], bool]) -> Gen
 		else:
 			current_chunk.append(element)
 	yield current_chunk
+
+
+def unzip[X](tuples_iterable: Iterable[tuple[X, ...]]) -> tuple[list[X], ...]:
+	return tuple(zip(*tuples_iterable))

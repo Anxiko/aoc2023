@@ -38,11 +38,23 @@ class Grid[T]:
 		return self._rows[coord.y][coord.x]
 
 	@classmethod
-	def from_raw_lines(cls, raw_lines: list[str], tile_parser: Callable[[str], T]) -> Self:
+	def from_raw_lines(cls, raw_lines: Iterable[str], tile_parser: Callable[[str], T]) -> Self:
 		return cls([
 			list(map(tile_parser, raw_line))
 			for raw_line in raw_lines
 		])
 
+	def transpose(self) -> Self:
+		return Grid(list(self.columns))
+
+	def mirror(self) -> Self:
+		return Grid(list(map(lambda row: list(reversed(row)), self.rows)))
+
 	def __str__(self) -> str:
 		return '\n'.join(''.join(map(str, row)) for row in self._rows)
+
+	def __eq__(self, other: Self) -> bool:
+		return self._rows == other._rows
+
+	def __hash__(self):
+		return hash(tuple(tuple(row) for row in self._rows))
