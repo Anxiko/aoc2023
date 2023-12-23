@@ -50,6 +50,16 @@ class Grid[T]:
 	def mirror(self) -> Self:
 		return Grid(list(map(lambda row: list(reversed(row)), self.rows)))
 
+	@classmethod
+	def initialize(cls, width: int, height: int, value_generator: Callable[[], T]) -> Self:
+		return cls([
+			[value_generator() for _ in range(width)]
+			for _ in range(height)
+		])
+
+	def is_valid_coord(self, coord: Coord) -> bool:
+		return 0 <= coord.x < self.width and 0 <= coord.y < self.height
+
 	def __str__(self) -> str:
 		return '\n'.join(''.join(map(str, row)) for row in self._rows)
 
