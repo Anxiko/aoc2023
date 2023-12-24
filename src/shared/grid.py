@@ -35,6 +35,9 @@ class Grid[T]:
 		return map(self._get_column, range(self.width))
 
 	def __getitem__(self, coord: Coord) -> T:
+		if not self.is_valid_coord(coord):
+			raise IndexError("Invalid coordinate")
+
 		return self._rows[coord.y][coord.x]
 
 	@classmethod

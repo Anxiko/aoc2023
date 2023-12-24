@@ -13,8 +13,15 @@ class Coord:
 	x: int
 	y: int
 
+	@classmethod
+	def at_origin(cls) -> Self:
+		return cls(0, 0)
+
 	def __add__(self, other: Self) -> Self:
 		return Coord(self.x + other.x, self.y + other.y)
+
+	def __sub__(self, other: Self) -> Self:
+		return Coord(self.x - other.x, self.y - other.y)
 
 	def __bool__(self) -> bool:
 		return self.x != 0 or self.y != 0
