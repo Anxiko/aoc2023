@@ -23,6 +23,12 @@ class Coord:
 	def __sub__(self, other: Self) -> Self:
 		return Coord(self.x - other.x, self.y - other.y)
 
+	def __mul__(self, other: int) -> Self:
+		return Coord(self.x * other, self.y * other)
+
+	def __neg__(self) -> Coord:
+		return Coord(-self.x, -self.y)
+
 	def __bool__(self) -> bool:
 		return self.x != 0 or self.y != 0
 
@@ -53,11 +59,26 @@ class Direction(enum.IntEnum):
 	West = 2
 	South = 3
 
+	@classmethod
+	def from_angle(cls, angle: int) -> Self:
+		return cls(angle % 4)
+
 	def to_delta(self) -> Coord:
 		return _DIRECTION_TO_COORD[self]
 
 	def rotate(self, rotation: int) -> Self:
 		return Direction((self.value + rotation) % 4)
+
+	@property
+	def is_vertical(self) -> bool:
+		return self in {Direction.North, Direction.South}
+
+	@property
+	def is_horizontal(self) -> bool:
+		return self in {Direction.East, Direction.West}
+
+	def __neg__(self) -> Self:
+		return self.rotate(2)
 
 
 _DIRECTION_TO_COORD: Mapping[Direction, Coord] = {

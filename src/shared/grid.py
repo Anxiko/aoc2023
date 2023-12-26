@@ -40,6 +40,11 @@ class Grid[T]:
 
 		return self._rows[coord.y][coord.x]
 
+	def __setitem__(self, coord: Coord, value: T) -> None:
+		if not self.is_valid_coord(coord):
+			raise IndexError("Invalid coordinate")
+		self._rows[coord.y][coord.x] = value
+
 	@classmethod
 	def from_raw_lines(cls, raw_lines: Iterable[str], tile_parser: Callable[[str], T]) -> Self:
 		return cls([
@@ -59,6 +64,18 @@ class Grid[T]:
 			[value_generator() for _ in range(width)]
 			for _ in range(height)
 		])
+
+	def map_row[X](self, row_mapper: Callable[[list[T]], list[X]]) -> 'Grid[X]':
+		return Grid(list(map(
+			row_mapper,
+			self.rows
+		)))
+
+	def map_tile[X](self, mapper: Callable[[T], X]) -> 'Grid[X]':
+		def row_mapper(row: list[T]) -> list[X]:
+			return list(map(mapper, row))
+
+		return self.map_row(row_mapper)
 
 	def is_valid_coord(self, coord: Coord) -> bool:
 		return 0 <= coord.x < self.width and 0 <= coord.y < self.height

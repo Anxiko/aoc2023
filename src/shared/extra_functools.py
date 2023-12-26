@@ -10,3 +10,10 @@ def negated[X](f: Callable[[X], bool]) -> Callable[[X], bool]:
 
 def is_not_none(x: Any) -> bool:
 	return x is not None
+
+
+def lazify[X](value: X) -> Callable[[], X]:
+	def lazified():
+		return value
+
+	return lazified()
