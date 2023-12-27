@@ -1,4 +1,4 @@
-from typing import Iterable, Callable, Self
+from typing import Iterable, Callable, Self, Generator
 
 from shared.coord import Coord
 
@@ -27,6 +27,11 @@ class Grid[T]:
 	def rows(self) -> Iterable[Line]:
 		return self._rows
 
+	def tiles_with_position(self) -> Generator[tuple[Coord, T], None, None]:
+		for y, row in enumerate(self._rows):
+			for x, tile in enumerate(row):
+				yield Coord(x, y), tile
+
 	def _get_column(self, column: int) -> Line:
 		return [row[column] for row in self._rows]
 
@@ -47,10 +52,12 @@ class Grid[T]:
 
 	@classmethod
 	def from_raw_lines(cls, raw_lines: Iterable[str], tile_parser: Callable[[str], T]) -> Self:
-		return cls([
-			list(map(tile_parser, raw_line))
-			for raw_line in raw_lines
-		])
+		return cls(
+			[
+				list(map(tile_parser, raw_line))
+				for raw_line in raw_lines
+			]
+		)
 
 	def transpose(self) -> Self:
 		return Grid(list(self.columns))
@@ -60,16 +67,22 @@ class Grid[T]:
 
 	@classmethod
 	def initialize(cls, width: int, height: int, value_generator: Callable[[], T]) -> Self:
-		return cls([
-			[value_generator() for _ in range(width)]
-			for _ in range(height)
-		])
+		return cls(
+			[
+				[value_generator() for _ in range(width)]
+				for _ in range(height)
+			]
+		)
 
 	def map_row[X](self, row_mapper: Callable[[list[T]], list[X]]) -> 'Grid[X]':
-		return Grid(list(map(
-			row_mapper,
-			self.rows
-		)))
+		return Grid(
+			list(
+				map(
+					row_mapper,
+					self.rows
+				)
+			)
+		)
 
 	def map_tile[X](self, mapper: Callable[[T], X]) -> 'Grid[X]':
 		def row_mapper(row: list[T]) -> list[X]:
